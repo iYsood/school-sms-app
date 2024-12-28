@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Purple Admin</title>
+    <link rel="icon" type="image/png" href="assets/images/favicon/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="assets/images/favicon/favicon.svg" />
+    <link rel="shortcut icon" href="assets/images/favicon/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/images/favicon/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="School SMS" />
+    <link rel="manifest" href="assets/images/favicon/site.webmanifest" />
+
+    <link rel="stylesheet" href="assets/vendors/mdi/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="assets/vendors/css/vendor.bundle.base.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+
+    <script src="assets/vendors/js/vendor.bundle.base.js"></script>
+    <script src="assets/js/dashboard.js"></script>
+  </head>
+  <body class="rtl">
+    <div class="container-scroller">
+      <div class="container-fluid page-body-wrapper">
+        <!-- partial:partials/_sidebar.html -->
+        <nav class="sidebar sidebar-offcanvas" id="sidebar"></nav>
+        <!-- partial -->
+        <div class="main-panel">
+          <div class="content-wrapper">
+            <div class="page-header">
+              <h3 class="page-title">
+                <span class="page-title-icon bg-gradient-primary text-white me-2">
+                  <i class="mdi mdi-home"></i>
+                </span> تطبيق الرسائل
+              </h3>
+            </div>
+            <div class="row">
+              <div class="col-12 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <h4 class="card-title">تحديث الاعدادات</h4>
+                    <form class="forms-sample">
+                      <div class="form-group">
+                        <label for="app-name">اسم المرسل</label>
+                        <input type="text" class="form-control" id="app-name" placeholder="اسم المرسل">
+                      </div>
+                      <div class="form-group">
+                        <label for="app-api">كود API</label>
+                        <input type="text" class="form-control" id="app-api" placeholder="كود API">
+                      </div>
+
+                      <button type="submit" class="btn btn-gradient-primary me-2">تحديث</button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+    $(document).ready(async function () {
+      $('#sidebar').empty().load('header.html');
+
+      try {
+        const { api_name, api_code } = await window.electronAPI.loadApiCode();
+        $('#app-name').val(api_name);
+        $('#app-api').val(api_code);
+      } catch (error) {
+        swal({
+          title: 'خطأ',
+          text: 'حدث خطأ أثناء تحميل بيانات API.',
+          icon: 'error',
+          button: 'حسنا'
+        });
+        console.error(error);
+        return;
+      }
+
+      $('form').on('submit', function (e) {
+        e.preventDefault();
+
+        let isValid = true;
+
+        $(this).find('.form-control').each(function () {
+          const value = $(this).val().trim();
+          if (!value) {
+            $(this).addClass('border-primary');
+            $(this).after('<small class="text-danger">هذا الحقل مطلوب</small>');
+            isValid = false;
+          } else {
+            $(this).removeClass('border-primary');
+            $(this).next('small.text-danger').remove();
+          }
+        });
+
+        if (!isValid) {
+          return;
+        }
+
+        const api_name = $('#app-name').val();
+        const api_code = $('#app-api').val();
+
+        window.electronAPI.saveApiCode(api_code, api_name)
+          .then((response) => {
+            if (response.success) {
+              swal({
+                title: 'تم حفظ الإعدادات بنجاح',
+                text: response.message,
+                icon: 'success',
+                button: {
+                  text: "حسنا",
+                  className: "btn btn-primary"
+                }
+              }).then(() => {
+                location.href = "index.html";
+              });
+            } else {
+              swal({
+                title: 'خطأ',
+                text: response.message,
+                icon: 'error',
+                button: 'حسنا'
+              });
+            }
+          })
+          .catch((error) => {
+            swal({
+              title: 'خطأ',
+              text: 'حدث خطأ أثناء حفظ الإعدادات.',
+              icon: 'error',
+              button: 'حسنا'
+            });
+            console.error(error);
+          });
+      });
+    });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Purple Admin</title>
+    <link rel="icon" type="image/png" href="assets/images/favicon/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="assets/images/favicon/favicon.svg" />
+    <link rel="shortcut icon" href="assets/images/favicon/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/images/favicon/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="School SMS" />
+    <link rel="manifest" href="assets/images/favicon/site.webmanifest" />
+
+    <link rel="stylesheet" href="assets/vendors/mdi/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="assets/vendors/css/vendor.bundle.base.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+
+    <script src="assets/vendors/js/vendor.bundle.base.js"></script>
+    <script src="assets/vendors/chart.js/chart.umd.js"></script>
+  </head>
+  <body class="rtl" dir="rtl">
+    <div class="container-scroller">
+      <div class="container-fluid page-body-wrapper">
+        <!-- partial:partials/_sidebar.html -->
+        <nav class="sidebar sidebar-offcanvas" id="sidebar"></nav>
+        <!-- partial -->
+        <div class="main-panel">
+          <div class="content-wrapper">
+            <div class="page-header">
+              <h3 class="page-title">
+                <span class="page-title-icon bg-gradient-primary text-white me-2">
+                  <i class="mdi mdi-home"></i>
+                </span> تطبيق الرسائل
+              </h3>
+              <nav aria-label="breadcrumb">
+                <ul class="breadcrumb">
+                  <li class="breadcrumb-item active" aria-current="page">
+                    <i class="mdi mdi-information-outline icon-sm text-primary align-middle"></i> التطبيق متوافق مع <a href="#"  onclick="openExternalLink('https://mobile.net.sa')" title="مؤسسة المدار التقني">مؤسسة المدار التقني</a>، سيتم اضافة المزيد لاحقاً
+                  </li>
+                </ul>
+              </nav>
+            </div>
+            <div class="row">
+              <div class="col-12 col-sm-6 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex justify-content-center">
+                      <i class="mdi mdi-clock icon-lg text-primary d-flex align-items-center"></i>
+                      <div class="d-flex flex-column me-3">
+                        <div class="d-flex flex-column">
+                          <p class="mb-0">رصيد الرسائل</p>
+                          <h4 class="font-weight-bold" id="total-balance">0</h4>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 col-sm-6 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex justify-content-center">
+                      <i class="mdi mdi-cart-outline icon-lg text-success d-flex align-items-center"></i>
+                      <div class="d-flex flex-column me-3">
+                        <div class="d-flex flex-column">
+                          <p class="mb-0">الرسائل المرسلة</p>
+                          <h4 class="font-weight-bold" id="total-messages">0</h4>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="clearfix">
+                      <h4 class="card-title float-end">احصائية ارسال الرسائل</h4>
+                      <div id="sms-usage-charts-legend" class="rounded-legend legend-horizontal legend-top-right float-start d-none"></div>
+                    </div>
+                    <canvas id="sms-usage-charts" class="mt-4"></canvas>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 grid-margin">
+                <div class="card">
+                  <div class="card-body">
+                    <h4 class="card-title">آخر 10 رسائل</h4>
+                    <div class="table table-hover table-responsive">
+                      <table class="table">
+                        <thead>
+                          <tr>
+                            <th> # </th>
+                            <th> الرسالة </th>
+                            <th> التاريخ </th>
+                            <th> الحالة </th>
+                          </tr>
+                        </thead>
+                        <tbody id="display-messages"></tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+    $(document).ready(async function () {
+      $('#sidebar').load('header.html');
+
+      const totalBalance = await window.electronAPI.totalBalance();
+      const loadMessages = await window.electronAPI.loadMessages();
+      const messageCount = Object.entries(loadMessages).length;
+
+      $('#total-balance').html(totalBalance);
+      $('#total-messages').html(Object.entries(loadMessages).length);
+
+      if (messageCount === 0) {
+        // إذا لم يكن هناك رسائل
+        $('#sms-usage-charts').replaceWith('<div class="alert alert-warning text-center">لاتوجد رسائل</div>');
+        $('#display-messages').html(`<tr><td colspan="4" class="text-center">لاتوجد رسائل</td></tr>`);
+        return; // إنهاء الكود
+      }
+
+      // تحويل بيانات JSON إلى صيغة مناسبة للرسم البياني
+      const messageData = typeof loadMessages === 'string' ? JSON.parse(loadMessages) : loadMessages;
+
+      // تجميع البيانات حسب الأشهر
+      const monthlyData = {};
+      const monthlyDataUnSuccess = {};
+
+      for (const [key, value] of Object.entries(messageData)) {
+        const date = new Date(key);
+        const monthYear = `${date.getFullYear()}-${date.getMonth() + 1}`; // صيغة السنة-الشهر
+
+        let rows = '';
+
+        // تحويل الرسائل إلى مصفوفة وترتيبها حسب التاريخ بترتيب تنازلي
+        const messagesArray = Object.entries(messageData)
+          .sort(([keyA], [keyB]) => new Date(keyB) - new Date(keyA)) // ترتيب تنازلي حسب التاريخ
+          .slice(0, 10); // اختيار أحدث 10 رسائل
+
+        // بناء الصفوف
+        messagesArray.forEach(([key, value], index) => {
+          const ident = index + 1; // رقم الرسالة
+          const formatted = new Date(key).toLocaleString(); // تحويل التاريخ إلى صيغة قراءة
+          rows += `
+            <tr>
+              <td>${ident}</td>
+              <td>${value.message}</td>
+              <td>${formatted}</td>
+              <td>${value.messageStatus === 'Success' ? '<i class="mdi mdi-check-circle text-success"></i>' : value.messageStatus === 'pending' ? '<i class="mdi mdi-clock text-warning"></i>' : '<i class="mdi mdi-close-circle text-danger"></i>'}</td>
+            </tr>
+          `;
+        });
+
+        // تحديث الجدول
+        $('#display-messages').html(rows);
+
+        if (!monthlyData[monthYear]) {
+          monthlyData[monthYear] = 0;
+        }
+
+        if (!monthlyDataUnSuccess[monthYear]) {
+          monthlyDataUnSuccess[monthYear] = 0;
+        }
+
+        if (value.messageStatus === "Success") {
+          monthlyData[monthYear] += 1;
+        }else{
+          monthlyDataUnSuccess[monthYear] += 1;
+        }
+      }
+
+      // استخراج الأشهر والبيانات للرسم البياني
+      const labels = Object.keys(monthlyData);
+      const successData = Object.values(monthlyData);
+      const unSuccessData = Object.values(monthlyDataUnSuccess);
+
+      // إعداد الرسم البياني
+      const ctx = document.getElementById('sms-usage-charts').getContext("2d");
+
+      const gradientStrokeViolet = ctx.createLinearGradient(0, 0, 0, 181);
+      gradientStrokeViolet.addColorStop(0, 'rgba(218, 140, 255, 1)');
+      gradientStrokeViolet.addColorStop(1, 'rgba(154, 85, 255, 1)');
+
+      const gradientStrokeRed = ctx.createLinearGradient(0, 0, 0, 300);
+      gradientStrokeRed.addColorStop(0, 'rgba(255, 191, 150, 1)');
+      gradientStrokeRed.addColorStop(1, 'rgba(254, 112, 150, 1)');
+
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels, // الأشهر كعناوين للمحور السيني
+          datasets: [
+            {
+              label: "الرسائل الناجحة",
+              backgroundColor: gradientStrokeViolet,
+              data: successData, // عدد الرسائل لكل شهر
+            },
+            {
+              label: "الرسائل الفاشلة",
+              backgroundColor: gradientStrokeRed,
+              data: unSuccessData, // عدد الرسائل لكل شهر
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          scales: {
+            y: {
+              display: true,
+              ticks: {
+                direction: 'rtl', // تغيير اتجاه النصوص على المحور Y
+              }
+            },
+            x: {
+              display: true,
+              ticks: {
+                direction: 'rtl', // تغيير اتجاه النصوص على المحور X
+              }
+            }
+          },
+          plugins: {
+            tooltip: {
+              rtl: true, // تمكين RTL لأداة التلميحات
+            },
+            legend: {
+              display: true,
+              labels: {
+                textAlign: 'right', // محاذاة النصوص إلى اليمين
+                textDirection: 'rtl', // اتجاه النصوص
+              }
+            }
+          },
+          layout: {
+            padding: {
+              right: 20, // مسافة إضافية لمحاذاة المحتوى
+            }
+          }
+        }
+      });
+
+    });
+    </script>
+  </body>
+</html>

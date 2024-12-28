@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Purple Admin</title>
+    <link rel="icon" type="image/png" href="assets/images/favicon/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="assets/images/favicon/favicon.svg" />
+    <link rel="shortcut icon" href="assets/images/favicon/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/images/favicon/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="School SMS" />
+    <link rel="manifest" href="assets/images/favicon/site.webmanifest" />
+
+    <link rel="stylesheet" href="assets/vendors/mdi/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="assets/vendors/css/vendor.bundle.base.css">
+    <link rel="stylesheet" href="assets/vendors/datatables.net-bs4/dataTables.bootstrap4.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+
+    <script src="assets/vendors/js/vendor.bundle.base.js"></script>
+    <script src="assets/vendors/sweetalert/sweetalert.min.js"></script>
+    <script src="assets/vendors/datatables.net/jquery.dataTables.js"></script>
+    <script src="assets/vendors/datatables.net-bs4/dataTables.bootstrap4.js"></script>
+    <script src="assets/js/dashboard.js"></script>
+  </head>
+  <body class="rtl">
+    <div class="container-scroller">
+      <div class="container-fluid page-body-wrapper">
+        <!-- partial:partials/_sidebar.html -->
+        <nav class="sidebar sidebar-offcanvas" id="sidebar"></nav>
+        <!-- partial -->
+        <div class="main-panel">
+          <div class="content-wrapper">
+            <div class="page-header">
+              <h3 class="page-title">
+                <span class="page-title-icon bg-gradient-primary text-white me-2">
+                  <i class="mdi mdi-home"></i>
+                </span> تطبيق الرسائل
+              </h3>
+            </div>
+            <div class="row">
+              <div class="col-lg-12 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <h4 class="card-title">عرض جميع المعلمين</h4>
+                    </p>
+                    <table class="table table-hover table-responsive">
+                      <thead>
+                        <tr>
+                          <th class="text-center">الهوية</th>
+                          <th class="text-center">الاسم</th>
+                          <th class="text-center">الهاتف</th>
+                          <th class="text-center">خيارات</th>
+                        </tr>
+                      </thead>
+                      <tbody class="display-teachers"></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+    $(document).ready(async function () {
+      $('#sidebar').load('header.html');
+      // تحميل API Code من الملف (إذا كان موجودًا)
+      const allTeachers = await window.electronAPI.loadTeachers();
+      for (const [key, value] of Object.entries(allTeachers)) {
+        $('.display-teachers').append(`
+          <tr data-index="${key}">
+            <td class="text-center">${key}</td>
+            <td class="text-center">${value.name}</td>
+            <td class="text-center">${value.phone}</td>
+            <td class="text-center">
+              <button class="btn btn-primary btn-edit" data-index="${key}" data-name="${ value.name }" data-phone="${ value.phone }">تعديل</button>
+              <button class="btn btn-danger btn-delete" data-index="${key}">حذف</button>
+            </td>
+          </tr>
+        `);
+      }
+
+      $('.table').DataTable({
+        responsive: true,
+        language: {
+          url: "assets/vendors/datatables.net/ar.json"
+        }
+      });
+
+      $(document).on('click', '.btn-edit', function () {
+        const row = $(this).closest('tr');
+        const index = row.data('index');
+        const name = $(this).data('name');
+        const phone = $(this).data('phone');
+
+        // تأكد من عدم وجود تعديل مفتوح بالفعل
+        if ($('.display-teachers').find('.btn-save').length > 0) {
+          swal({
+            text: 'أكمل التعديل أولا!',
+            button: {
+              text: "موافق",
+              className: "btn btn-primary"
+            }
+          })
+          return;
+        }
+
+        const studentCID = index
+        const studentName = name
+        const studentPhone = phone
+
+        row.find('td:nth-child(1)').html(`<input type="text" class="form-control  edit-c_id" value="${ studentCID }">`);
+        row.find('td:nth-child(2)').html(`<input type="text" class="form-control edit-name" value="${ studentName }">`);
+        row.find('td:nth-child(3)').html(`<input type="text" class="form-control edit-phone" value="${ studentPhone }">`);
+
+        row.data('original', {
+          "c_id": studentCID,
+          "phone": studentName,
+          "name": studentPhone
+        });
+
+        row.find('td:nth-child(4)').html(`
+          <button class="btn btn-success btn-save" data-index="${index}">حفظ</button>
+          <button class="btn btn-secondary btn-cancel" data-index="${index}">الغاء</button>
+        `);
+      });
+
+      $(document).on('click', '.btn-cancel', function () {
+        const row = $(this).closest('tr');
+        const index = row.data('index');
+
+        // استعادة القيم الأصلية
+        const original = row.data('original');
+        const studentCID = original["c_id"]
+        const studentName = original["phone"]
+        const studentPhone = original["name"]
+
+        row.find('td:nth-child(1)').text(studentCID);
+        row.find('td:nth-child(2)').text(studentName);
+        row.find('td:nth-child(3)').text(studentPhone);
+
+        // إعادة الأزرار إلى حالتها الأصلية
+        row.find('td:nth-child(4)').html(`
+          <button class="btn btn-primary btn-edit" data-index="${index}" data-name="${ studentName }" data-phone="${ studentPhone }">تعديل</button>
+          <button class="btn btn-danger btn-delete" data-index="${index}">حذف</button>
+        `);
+      });
+
+      $(document).on('click', '.btn-delete', function () {
+        const index = $(this).data('index');
+
+        swal({
+          title: `هل أنت متأكد من الحذف؟`,
+          icon: 'warning',
+          buttons: {
+            cancel: {
+              text: "الغاء",
+              value: null,
+              visible: true,
+              className: "btn btn-danger",
+              closeModal: true,
+            },
+            confirm: {
+              text: "ارسال",
+              value: true,
+              visible: true,
+              className: "btn btn-primary",
+              closeModal: true,
+            }
+          }
+        }).then((value) => {
+          if (value) {
+            window.electronAPI.deleteTeacher(index).then(response => {
+              if (response.success) {
+                console.success('Student deleted successfully');
+                location.reload(); // إعادة تحميل الجدول
+              } else {
+                console.error(response.message || 'Error deleting student');
+              }
+            });
+          }
+        });
+      });
+
+      // حدث التعديل
+      $(document).on('click', '.btn-save', function () {
+        const row = $(this).closest('tr');
+        const index = row.data('index');
+
+        // جمع البيانات من الحقول
+        const updatedTeachers = {
+          "c_id": row.find('.edit-c_id').val(),
+          "name": row.find('.edit-name').val(),
+          "phone": row.find('.edit-phone').val()
+        };
+
+        // التحقق من صحة البيانات
+        if (!updatedTeachers["c_id"] || !updatedTeachers["name"] || !updatedTeachers["phone"]) {
+          swal({
+            text: 'جميع الحقول مطلوبة',
+            button: {
+              text: "موافق",
+              className: "btn btn-primary"
+            }
+          })
+          return;
+        }
+
+        // إرسال التعديلات إلى الخلفية (backend)
+        window.electronAPI.editTeacher(index, updatedTeachers).then(response => {
+          if (response.success) {
+            swal({
+              text: 'تم التحديث بنجاح',
+              button: {
+                text: "موافق",
+                className: "btn btn-primary"
+              }
+            })
+
+            // تحديث النصوص في الصف
+            row.find('td:nth-child(1)').text(updatedTeachers["c_id"]);
+            row.find('td:nth-child(2)').text(updatedTeachers["name"]);
+            row.find('td:nth-child(3)').text(updatedTeachers["phone"]);
+
+            // إعادة الأزرار إلى حالتها الأصلية
+            row.find('td:nth-child(4)').html(`
+              <button class="btn btn-primary btn-edit" data-index="${index}" data-name="${ updatedTeachers.name }" data-phone="${ updatedTeachers.phone }">تعديل</button>
+              <button class="btn btn-danger btn-delete" data-index="${index}">حذف</button>
+            `);
+          } else {
+            console.error(response.message || 'Error updating student');
+          }
+        });
+      });
+    });
+    </script>
+  </body>
+</html>

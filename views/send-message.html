@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Purple Admin</title>
+    <link rel="icon" type="image/png" href="assets/images/favicon/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="assets/images/favicon/favicon.svg" />
+    <link rel="shortcut icon" href="assets/images/favicon/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/images/favicon/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="School SMS" />
+    <link rel="manifest" href="assets/images/favicon/site.webmanifest" />
+
+    <link rel="stylesheet" href="assets/vendors/mdi/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="assets/vendors/css/vendor.bundle.base.css">
+    <link rel="stylesheet" href="assets/vendors/select2/select2.min.css">
+    <link rel="stylesheet" href="assets/vendors/select2-bootstrap-theme/select2-bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+
+    <script src="assets/vendors/js/vendor.bundle.base.js"></script>
+    <script src="assets/vendors/sweetalert/sweetalert.min.js"></script>
+    <script src="assets/vendors/select2/select2.min.js"></script>
+    <script src="assets/js/dashboard.js"></script>
+  </head>
+  <body class="rtl">
+    <div class="container-scroller">
+      <div class="container-fluid page-body-wrapper">
+        <!-- partial:partials/_sidebar.html -->
+        <nav class="sidebar sidebar-offcanvas" id="sidebar"></nav>
+        <!-- partial -->
+        <div class="main-panel">
+          <div class="content-wrapper">
+            <div class="page-header">
+              <h3 class="page-title">
+                <span class="page-title-icon bg-gradient-primary text-white me-2">
+                  <i class="mdi mdi-home"></i>
+                </span> تطبيق الرسائل
+              </h3>
+            </div>
+            <div class="row">
+
+              <div class="col-lg-12">
+                <div class="card">
+                  <div class="card-body sends-form">
+                    <div class="d-sm-flex pb-4 mb-4 border-bottom">
+                      <div class="d-flex align-items-center">
+                        <h5 class="page-title mb-n2">ارسال رسالة جديدة</h5>
+                      </div>
+                    </div>
+                    <div class="nav-scroller">
+                      <ul class="nav nav-tabs tickets-tab-switch" role="tablist">
+                        <li class="nav-item">
+                          <a class="nav-link rounded active" id="open-tab" data-bs-toggle="tab" href="#open-tickets" role="tab" aria-controls="open-tickets" aria-selected="true">رسالة الى طالب</a>
+                        </li>
+                        <li class="nav-item">
+                          <a class="nav-link rounded" id="pending-tab" data-bs-toggle="tab" href="#pending-tickets" role="tab" aria-controls="pending-tickets" aria-selected="false">رسالة الى معلم</a>
+                        </li>
+                        <li class="nav-item">
+                          <a class="nav-link rounded" id="onhold-tab" data-bs-toggle="tab" href="#onhold-tickets" role="tab" aria-controls="onhold-tickets" aria-selected="false">رسالة الى مجموعة</a>
+                        </li>
+                      </ul>
+                    </div>
+                    <div class="tab-content border-0 tab-content-basic">
+                      <div class="tab-pane fade show active" id="open-tickets" role="tabpanel" aria-labelledby="open-tickets">
+                        <form>
+                          <h4 class="card-title">رسالة الى طالب</h4>
+                          <div class="form-group">
+                            <label for="send-to">اسم الطالب</label>
+                            <select id="send-to" style="width:100%">
+                              <option value="" disabled selected>اختر خيارًا...</option>
+                            </select>
+                          </div>
+                          <div class="form-group">
+                            <label>رقم الهاتف</label>
+                            <input type="text" class="form-control" id="send-phone" disabled>
+                          </div>
+                          <div class="form-group">
+                            <label for="send-message">محتوى الرسالة</label>
+                            <textarea class="form-control" id="send-message" rows="8"></textarea>
+                            <p class="form-text">عدد الأحرف <span>0</span></p>
+                          </div>
+                          <div class="form-group">
+                            <label for="send-message">اختصارات الرسالة</label>
+                            <div>
+                              <button type="button" class="btn btn-outline-primary btn-fw btn-sm" data-insert="{{first_name}}">الاسم الأول</button>
+                              <button type="button" class="btn btn-outline-primary btn-fw btn-sm" data-insert="{{phone}}">رقم الهاتف</button>
+                            </div>
+                          </div>
+                          <hr>
+
+                          <input type="hidden" id="send-type" value="send-single">
+                          <button type="submit" class="btn btn-outline-success btn-fw me-2 w-100">ارسال الرسالة</button>
+                        </form>
+                      </div>
+                      <div class="tab-pane fade" id="pending-tickets" role="tabpanel" aria-labelledby="pending-tickets">
+                        <form>
+                          <h4 class="card-title">رسالة الى معلم</h4>
+                          <div class="form-group">
+                            <label for="send-to-teacher">اسم المعلم</label>
+                            <select id="send-to-teacher" style="width:100%">
+                              <option value="" disabled selected>اختر خيارًا...</option>
+                            </select>
+                          </div>
+                          <div class="form-group">
+                            <label>رقم الهاتف</label>
+                            <input type="text" class="form-control" id="send-phone" disabled>
+                          </div>
+                          <div class="form-group">
+                            <label for="send-message">محتوى الرسالة</label>
+                            <textarea class="form-control" id="send-message" rows="8"></textarea>
+                            <p class="form-text">عدد الأحرف <span>0</span></p>
+                          </div>
+                          <div class="form-group">
+                            <label for="send-message">اختصارات الرسالة</label>
+                            <div>
+                              <button type="button" class="btn btn-outline-primary btn-fw btn-sm" data-insert="{{first_name}}">الاسم الأول</button>
+                              <button type="button" class="btn btn-outline-primary btn-fw btn-sm" data-insert="{{phone}}">رقم الهاتف</button>
+                            </div>
+                          </div>
+                          <hr>
+
+                          <input type="hidden" id="send-type" value="send-teacher">
+                          <button type="submit" class="btn btn-outline-success btn-fw me-2 w-100">ارسال الرسالة</button>
+                        </form>
+                      </div>
+                      <div class="tab-pane fade" id="onhold-tickets" role="tabpanel" aria-labelledby="onhold-tickets">
+                        <form>
+                          <h4 class="card-title">رسالة الى مجموعة</h4>
+                          <div class="form-group">
+                            <label for="send-to-group">اختر المجموعة</label>
+                            <select id="send-to-group" style="width:100%">
+                              <option value="" disabled selected>اختر خيارًا...</option>
+                            </select>
+                          </div>
+                          <div class="form-group">
+                            <label for="send-message">محتوى الرسالة</label>
+                            <textarea class="form-control" id="send-message" rows="8"></textarea>
+                            <p class="form-text">عدد الأحرف <span>0</span></p>
+                          </div>
+                          <div class="form-group">
+                            <label for="send-message">اختصارات الرسالة</label>
+                            <div>
+                              <button type="button" class="btn btn-outline-primary btn-fw btn-sm" data-insert="{{first_name}}">الاسم الأول</button>
+                              <button type="button" class="btn btn-outline-primary btn-fw btn-sm" data-insert="{{phone}}">رقم الهاتف</button>
+                            </div>
+                          </div>
+                          <hr>
+
+                          <input type="hidden" id="send-type" value="send-group">
+                          <button type="submit" class="btn btn-outline-success btn-fw me-2 w-100">ارسال الرسالة</button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+    $(document).ready(async function () {
+      $('#sidebar').load('header.html');
+
+      const { api_name, api_code } = await window.electronAPI.loadApiCode();
+      if (!api_code || api_code === ''){
+        $('.sends-form').addClass('bg-primary text-white text-center').html(`
+          يجب عليك ضبط الاعدادات لتفعيل الارسال
+        `);
+        return;
+      }
+      const allStudents = await window.electronAPI.loadStudents();
+      const allTeachers = await window.electronAPI.loadTeachers();
+
+      for (const [key, value] of Object.entries(allStudents)) {
+        $('#send-to').append(`
+          <option value="${key}" data-phone="${value.phone}">${value.name}</option>
+        `);
+      }
+
+      for (const [key, value] of Object.entries(allTeachers)) {
+        $('#send-to-teacher').append(`
+          <option value="${key}" data-phone="${value.phone}">${value.name}</option>
+        `);
+      }
+
+      let _classes = {};
+      let classesArray = [];
+
+      for (const [key, value] of Object.entries(allStudents)) {
+        if (!_classes[value.class]) {
+          _classes[value.class] = true;
+          classesArray.push(value.class);
+        }
+      }
+
+      classesArray.sort((a, b) => a - b);
+
+      $('#send-to-group').empty().append(`
+        <option value="teachers">المعلمين</option>
+      `);
+
+      classesArray.forEach((classValue) => {
+        $('#send-to-group').append(`
+          <option value="${classValue}">الصف ${classValue}</option>
+        `);
+      });
+
+      $('textarea').on('input', function() {
+          const charCount = $(this).val().length;
+          $(this).closest('.form-group').find('.form-text span').text(charCount);
+      });
+
+      $('button[data-insert]').on('click', function() {
+        const textToInsert = $(this).data('insert');
+
+        const textarea = $(this).closest('form').find('textarea');
+
+        const cursorPos = textarea.prop('selectionStart');
+        const textBefore = textarea.val().substring(0, cursorPos);
+        const textAfter = textarea.val().substring(cursorPos);
+
+        textarea.val(textBefore + textToInsert + textAfter);
+        const charCount = textarea.val().length;
+        textarea.closest('.form-group').find('.form-text span').text(charCount);
+      });
+
+      $('#send-to, #send-to-teacher, #send-to-group').select2({
+        dir: 'rtl',
+        width: '100%',
+        placeholder: 'اختر خيارًا',
+        allowClear: true
+      });
+
+      $('#send-to, #send-to-teacher').on('change', function() {
+          const selectedValue = $(this).find(':selected').data('phone');
+
+          $(this).closest('form').find('#send-phone').val(selectedValue !== 'اختر ...' ? selectedValue : '');
+      });
+
+      $('form').on('submit', async function(event) {
+        event.preventDefault();
+
+        const formTitle = $(this).closest('form').find('.card-title').text();
+        const sendType = $(this).find('#send-type').val();
+        let phone;
+        let message;
+
+        if (sendType === 'send-single') {
+          phone = $(this).find('#send-to').val();
+          message = $(this).find('#send-message').val();
+        } else if (sendType === 'send-teacher') {
+          phone = $(this).find('#send-to-teacher').val();
+          message = $(this).find('#send-message').val();
+        } else if (sendType === 'send-group') {
+          phone = $(this).find('#send-to-group').val();
+          message = $(this).find('#send-message').val();
+        }
+
+        if (!phone || phone === 'اختر ...' || !message) {
+          swal({
+            text: 'يرجى تعبئة جميع الحقول',
+            icon: 'warning',
+            confirmButtonText: 'موافق'
+          });
+        } else {
+          const sended_message = {
+            type: sendType,
+            number: phone,
+            messageBody: message,
+          };
+
+          const userConfirmed = await swal({
+            title: `هل أنت متأكد من ارسال الرسالة ${formTitle}؟`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'ارسال',
+            cancelButtonText: 'الغاء',
+            buttons: {
+              cancel: {
+                text: "الغاء",
+                value: null,
+                visible: true,
+                className: "btn btn-danger",
+                closeModal: true,
+              },
+              confirm: {
+                text: "تأكيد الارسال",
+                value: true,
+                visible: true,
+                className: "btn btn-primary",
+                closeModal: true
+              }
+            }
+          }).then(async (value) => {
+            if (!value || value !== true) { return; }
+            try {
+              const response = await window.electronAPI.sendMessage(sended_message);
+              swal({
+                title: response.title,
+                text: response.message,
+                icon: response.success === true ? 'success' : 'error',
+                confirmButtonText: 'حسنا',
+              });
+              this.reset();
+              $(this).find('select').val(null).trigger('change');
+            } catch (error) {
+              swal({
+                title: 'خطأ!',
+                text: 'حدث خطأ أثناء ارسال الرسالة.',
+                icon: 'error',
+                confirmButtonText: 'حسنا',
+              });
+              console.error('Error sending message:', error);
+            }
+          });
+        }
+      });
+    });
+    </script>
+  </body>
+</html>

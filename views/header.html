@@ -1,0 +1,135 @@
+
+  <ul class="nav">
+    <li class="nav-item nav-profile">
+      <a href="#" class="nav-link">
+        <div class="nav-profile-text d-flex flex-column">
+          <h4 class="font-weight-bold mb-2">تطبيق الرسائل</h4>
+        </div>
+        <span class="badge rounded-pill text-bg-success">V1.0</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="index.html">
+        <span class="menu-title">الرئيسية</span>
+        <i class="mdi mdi-home menu-icon"></i>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="setup.html">
+        <span class="menu-title">الاعدادات</span>
+        <i class="mdi mdi-cog menu-icon"></i>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-bs-toggle="collapse" href="#ui-students" aria-expanded="false" aria-controls="ui-students">
+        <span class="menu-title">الطلاب</span>
+        <i class="menu-arrow"></i>
+        <i class="mdi mdi-school menu-icon"></i>
+      </a>
+      <div class="collapse" id="ui-students">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item">
+            <a class="nav-link" href="all-students.html">عرض الكل</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" onclick="showConfirmImport('student')">استيراد ملف الطلاب</a>
+          </li>
+        </ul>
+      </div>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-bs-toggle="collapse" href="#ui-teachers" aria-expanded="false" aria-controls="ui-teachers">
+        <span class="menu-title">المعلمين</span>
+        <i class="menu-arrow"></i>
+        <i class="mdi mdi-account-tie menu-icon"></i>
+      </a>
+      <div class="collapse" id="ui-teachers">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item">
+            <a class="nav-link" href="all-teachers.html">عرض الكل</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#" onclick="showConfirmImport('teacher')">استيراد ملف المعلمين</a>
+          </li>
+        </ul>
+      </div>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="send-message.html">
+        <span class="menu-title">ارسال رسالة</span>
+        <i class="mdi mdi-send menu-icon"></i>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="all-messages.html">
+        <span class="menu-title">أرشيف الرسائل</span>
+        <i class="mdi mdi-email menu-icon"></i>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#" onclick="openExternalLink('https://app.mobile.net.sa/balance/buy-sms')">
+        <span class="menu-title text-primary">شراء رصيد</span>
+        <i class="mdi mdi-cart menu-icon"></i>
+      </a>
+    </li>
+  </ul>
+
+<script src="assets/vendors/sweetalert/sweetalert.min.js"></script>
+<style>
+  .swal-text {
+    direction: rtl;
+    text-align: right;
+  }
+</style>
+<script>
+  function openExternalLink(url) {
+    swal({
+      title: `تحويل لصفحة خارجية`,
+      text: `سيتم تحويلك الى الموقع الخاص بالخدمة لشراء رصيد، وبعد الشراء قم بالضبط على الرئيسية وسيتم تحديث الرصيد مباشرة`,
+      icon: 'info',
+      buttons: {
+        cancel: {
+          text: "الغاء",
+          value: null,
+          visible: true,
+          className: "btn btn-danger",
+          closeModal: true,
+        },
+        confirm: {
+          text: "ذهاب",
+          value: true,
+          visible: true,
+          className: "btn btn-primary",
+          closeModal: true
+        }
+      }
+    }).then((value) => {
+      if (!value || value === false){ return; }
+      window.electronAPI.openExternalLink(url);
+    });
+  }
+
+  function showConfirmImport(_which){
+    let textContent = `من نظام نور توجه الى:\r\n- التقارير\r\n- تقارير الإحصائية\r\n- البيانات الخاصة بالارشاد الطلابي\r\nتصدير`
+    if (_which !== 'student'){
+      textContent = `من نظام نور توجه الى:\r\n- التقارير\r\n- تقارير المعلمين\r\n- بيانات معلمي المدرسة\r\nتصدير`
+    }
+
+    swal({
+      title: `طريقة احضار الملف لاستيراده`,
+      text: textContent,
+      icon: 'info',
+      buttons: {
+        confirm: {
+          text: "حسنا",
+          value: true,
+          visible: true,
+          className: "btn btn-primary",
+          closeModal: true,
+        }
+      }
+    }).then((value) => {
+      _which === 'student' ? window.electronAPI.importExcelStudents() : window.electronAPI.importExcelTeachers();
+    });
+  }
+</script>

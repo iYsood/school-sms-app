@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Purple Admin</title>
+    <link rel="icon" type="image/png" href="assets/images/favicon/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="assets/images/favicon/favicon.svg" />
+    <link rel="shortcut icon" href="assets/images/favicon/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/images/favicon/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="School SMS" />
+    <link rel="manifest" href="assets/images/favicon/site.webmanifest" />
+
+    <link rel="stylesheet" href="assets/vendors/mdi/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="assets/vendors/css/vendor.bundle.base.css">
+    <link rel="stylesheet" href="assets/vendors/datatables.net-bs4/dataTables.bootstrap4.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+
+    <script src="assets/vendors/js/vendor.bundle.base.js"></script>
+    <script src="assets/vendors/sweetalert/sweetalert.min.js"></script>
+    <script src="assets/vendors/datatables.net/jquery.dataTables.js"></script>
+    <script src="assets/vendors/datatables.net-bs4/dataTables.bootstrap4.js"></script>
+    <script src="assets/js/dashboard.js"></script>
+  </head>
+  <body class="rtl">
+    <div class="container-scroller">
+      <div class="container-fluid page-body-wrapper">
+        <!-- partial:partials/_sidebar.html -->
+        <nav class="sidebar sidebar-offcanvas" id="sidebar"></nav>
+        <!-- partial -->
+        <div class="main-panel">
+          <div class="content-wrapper">
+            <div class="page-header">
+              <h3 class="page-title">
+                <span class="page-title-icon bg-gradient-primary text-white me-2">
+                  <i class="mdi mdi-home"></i>
+                </span> تطبيق الرسائل
+              </h3>
+            </div>
+            <div class="row">
+              <div class="col-lg-12 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <h4 class="card-title">أرشيف الرسائل <div class="rounded-legend legend-horizontal legend-top-right float-start"><i class="mdi mdi-reload text-primary" id="reload-messages"></i></div></h4>
+                    </p>
+                    <table class="table table-hover table-responsive">
+                      <thead>
+                        <tr>
+                          <th>#</th>
+                          <th>الرسالة</th>
+                          <th>التاريخ</th>
+                          <th>الحالة</th>
+                        </tr>
+                      </thead>
+                      <tbody id="display-messages"></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+    async function loadAndDisplayMessages() {
+      let ident = 0;
+
+      try {
+        // عرض علامة التحديث
+        $('#display-messages').html('<tr><td colspan="4" class="text-center"><div class="spinner-border text-primary" role="status"></div></td></tr>');
+
+
+        // جلب الرسائل
+        const loadMessages = await window.electronAPI?.loadMessages();
+        await new Promise(resolve => setTimeout(resolve, 500));
+        if (!loadMessages || Object.keys(loadMessages).length === 0) {
+          $('#display-messages').html('<tr><td colspan="4" class="text-center text-muted">لا توجد رسائل</td></tr>');
+          return;
+        }
+
+        let rows = '';
+        for (const [key, value] of Object.entries(loadMessages)) {
+          const date = new Date(key);
+          const formatted = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
+
+          ident += 1;
+          rows += `
+            <tr>
+              <td>${ident}</td>
+              <td>${value.message}</td>
+              <td>${formatted}</td>
+              <td>${value.messageStatus === 'Success' ? '<i class="mdi mdi-check-circle text-success"></i>' : value.messageStatus === 'pending' ? '<i class="mdi mdi-clock text-warning"></i>' : '<i class="mdi mdi-close-circle text-danger"></i>'}</td>
+            </tr>
+          `;
+        }
+
+        // تحديث الجدول بالبيانات الجديدة
+        $('#display-messages').html(rows);
+      } catch (error) {
+        console.error('Error loading messages:', error);
+        swal({
+          text: `حدث خطأ أثناء استعادة الرسائل: ${error.message}`,
+          icon: 'error',
+          button: {
+            text: "موافق",
+            className: "btn btn-primary"
+          }
+        });
+      }
+
+      $('.table').DataTable({
+        responsive: true,
+        language: {
+          url: "assets/vendors/datatables.net/ar.json"
+        }
+      });
+    }
+
+    $(document).ready(async function () {
+      $('#sidebar').load('header.html');
+      await loadAndDisplayMessages();
+    });
+
+    $('#reload-messages').click(async function () {
+      await loadAndDisplayMessages();
+    });
+    </script>
+  </body>
+</html>
