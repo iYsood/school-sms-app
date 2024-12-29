@@ -7,10 +7,17 @@ const xlsx = require('xlsx');
 let mainWindow;
 
 let api_code = '', api_name = 'School1', all_students = {}, all_teachers = {}, all_messages = {};
-const api_code_file = path.join(__dirname, 'files/api.json');
-const students_file = path.join(__dirname, 'files/students.json');
-const teachers_file = path.join(__dirname, 'files/teachers.json');
-const messages_file = path.join(__dirname, 'files/messages.json');
+const userDataPath = app.getPath('userData');
+const filesDir = path.join(userDataPath, 'files');
+
+if (!fs.existsSync(filesDir)) {
+  fs.mkdirSync(filesDir, { recursive: true });
+}
+
+const api_code_file = path.join(filesDir, 'api.json');
+const students_file = path.join(filesDir, 'students.json');
+const teachers_file = path.join(filesDir, 'teachers.json');
+const messages_file = path.join(filesDir, 'messages.json');
 
 try {
   // التعامل مع ملف API
@@ -70,12 +77,13 @@ app.whenReady().then(() => {
 
   mainWindow = new BrowserWindow({
     width: Math.floor(width * 0.8),
-    height: Math.floor(height * 0.83),
+    height: Math.floor(height * 0.85),
     resizable: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true
-    }
+    },
+    icon: path.join(__dirname, 'views/assets/images/favicon/web-app-manifest-512x512.png')
   });
 
   mainWindow.loadFile('views/index.html');

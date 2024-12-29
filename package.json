@@ -9,30 +9,7 @@
   "main": "main.js",
   "scripts": {
     "start": "cls && electron .",
-    "dist": "electron-builder",
     "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "build": {
-    "appId": "com.iysood.school-sms",
-    "productName": "School SMS",
-    "files": [
-      "views/**/*",
-      "node_modules/**/*",
-      "main.js",
-      "package.json"
-    ],
-    "directories": {
-      "output": "build"
-    },
-    "publish": {
-      "provider": "github",
-      "owner": "iYsood",
-      "repo": "https://github.com/iYsood/school-sms-app.git"
-    },
-    "win": {
-      "target": "nsis",
-      "icon": "assets/images/favicon/favicon.ico"
-    }
   },
   "dependencies": {
     "fs": "^0.0.1-security",
@@ -41,7 +18,6 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
-    "electron": "^33.2.1",
-    "electron-builder": "^25.1.8"
+    "electron": "^33.2.1"
   }
 }
