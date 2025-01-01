@@ -7,7 +7,8 @@ const xlsx = require('xlsx');
 let mainWindow;
 
 let api_code = '', api_name = 'School1', all_students = {}, all_teachers = {}, all_messages = {};
-const userDataPath = app.getPath('userData');
+// const userDataPath = app.getPath('userData');
+const userDataPath = __dirname;
 const filesDir = path.join(userDataPath, 'files');
 
 if (!fs.existsSync(filesDir)) {
@@ -126,9 +127,9 @@ ipcMain.handle('get-total-balance', async () => {
         return;
       }
 
-      console.log('Status:', response.statusCode);
-      console.log('Headers:', JSON.stringify(response.headers));
-      console.log('Response:', body);
+      // console.log('Status:', response.statusCode);
+      // console.log('Headers:', JSON.stringify(response.headers));
+      // console.log('Response:', body);
 
       // تحقق من حالة الرد
       if (response.statusCode !== 200) {
@@ -222,7 +223,7 @@ async function updatePendingMessages() {
     return;
   }
 
-  console.log(`Found ${pendingMessages.length} pending messages.`);
+  // console.log(`Found ${pendingMessages.length} pending messages.`);
 
   for (const [timestamp, message] of pendingMessages) {
     try {
