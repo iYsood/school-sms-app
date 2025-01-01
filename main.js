@@ -1,4 +1,4 @@
-const { app, BrowserWindow, screen, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, Menu, screen, ipcMain, dialog } = require('electron');
 const { autoUpdater } = require('electron-updater');
 const fs = require('fs');
 const path = require('path');
@@ -8,8 +8,8 @@ const xlsx = require('xlsx');
 let mainWindow;
 
 let api_code = '', api_name = 'School1', all_students = {}, all_teachers = {}, all_messages = {};
-// const userDataPath = app.getPath('userData');
-const userDataPath = __dirname;
+const userDataPath = app.getPath('userData');
+// const userDataPath = __dirname;
 const filesDir = path.join(userDataPath, 'files');
 
 if (!fs.existsSync(filesDir)) {
@@ -77,10 +77,13 @@ app.whenReady().then(() => {
   const display = externalDisplay || screen.getPrimaryDisplay();
   const { width, height } = display.workAreaSize;
 
+  Menu.setApplicationMenu(null);
+
   mainWindow = new BrowserWindow({
     width: Math.floor(width * 0.8),
     height: Math.floor(height * 0.85),
     resizable: true,
+    icon: __dirname + '/build/icons/logo-256.ico',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true
