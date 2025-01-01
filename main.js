@@ -1,4 +1,5 @@
 const { app, BrowserWindow, screen, ipcMain, dialog } = require('electron');
+const { autoUpdater } = require('electron-updater');
 const fs = require('fs');
 const path = require('path');
 const request = require('request');
@@ -89,6 +90,23 @@ app.whenReady().then(() => {
 
   mainWindow.loadFile('views/index.html');
   // mainWindow.webContents.toggleDevTools();
+
+  // تحقق من التحديث عند بدء التطبيق
+  autoUpdater.checkForUpdatesAndNotify();
+
+  // عرض حالة التحديث
+  autoUpdater.on('update-available', () => {
+    mainWindow.webContents.send('message', 'Update available. Downloading...');
+  });
+
+  autoUpdater.on('update-downloaded', () => {
+    mainWindow.webContents.send('message', 'Update downloaded. It will install on restart.');
+    autoUpdater.quitAndInstall(); // يغلق البرنامج ويثبت التحديث
+  });
+
+  autoUpdater.on('error', (error) => {
+    mainWindow.webContents.send('message', `Update error: ${error}`);
+  });
 });
 
 app.on('window-all-closed', () => {

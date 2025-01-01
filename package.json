@@ -9,15 +9,31 @@
   "main": "main.js",
   "scripts": {
     "start": "cls && electron .",
+    "build": "electron-builder",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "build": {
+    "appId": "com.iysood.sms-app",
+    "win": {
+      "target": "nsis"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "iYsood",
+        "repo": "school-sms-app"
+      }
+    ]
+  },
   "dependencies": {
+    "electron-updater": "^6.3.9",
     "fs": "^0.0.1-security",
     "path": "^0.12.7",
     "request": "^2.88.2",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
-    "electron": "^33.2.1"
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8"
   }
 }
